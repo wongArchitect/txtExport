@@ -1,6 +1,8 @@
 import com.sun.deploy.util.StringUtils;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -20,6 +22,8 @@ public class TxtExport {
 		
 		fileObjects = getAllFile(dirPath,fileObjects);
 
+		//今日统计
+		String todayStatistics = todayStatistics(fileObjects);
 		//排序
 		fileObjects.sort(new Comparator<FileObject>() {
 			@Override
@@ -35,6 +39,7 @@ public class TxtExport {
 
 		List<FileObject> dirObjects = new ArrayList<>();
 		List<FileObject> fileObjectsTemp = new ArrayList<>();
+		//原样打印
 		for(FileObject f : fileObjects){
 			if(f.getType().equals("dir")){
 				dirObjects.add(f);
@@ -43,6 +48,15 @@ public class TxtExport {
 				fileObjectsTemp.add(f);
 			}
 		}
+		//不重复打印
+//		for(FileObject f : fileObjects) {
+//			if(f.getType().equals("dir")){
+//				dirObjects.add(f);
+//			}
+//		}
+//		for(FileObject f : singleFileMap.values()){
+//				fileObjectsTemp.add(f);
+//		}
 
 		//把文件放对应文件夹中
 		List<List<FileObject>> rusultFileObjects = new ArrayList<>();
@@ -57,19 +71,33 @@ public class TxtExport {
 			rusultFileObjects.add(rusultFileObjectsTemp);
 		}
 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss") ; //使用了默认的格式创建了一个日期格式化对象。
+		String fileContent = "    - - - - - - - - -    " + "****" + "  今日写作  ****" + "    - - - - - - - - -   \n";
+		fileContent += "日期: " + dateFormat.format(new Date()) + "\n" + "\n";
+		fileContents.add(fileContent);
 		//今日新增
-		if (dirObjects.size() > 0 && fileObjectsTemp.size() > 0) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss") ; //使用了默认的格式创建了一个日期格式化对象。
+		todayAdd(dirObjects, fileObjectsTemp, fileContents);
+		//添加今日统计内容
+		fileContents.add(todayStatistics);
+		//原样打印
+		fileContents.addAll(fileContentSplitJoint(rusultFileObjects, order));
+		exportByDocFormat(exportPath, fileContents);
+		//不重复打印
+//		exportByDocFormat(exportPath, fileContentSplitJointAbandonSame(rusultFileObjects, order));
+	}
 
-			List<FileObject> todayNewDirs = new ArrayList<>();
+	private static void todayAdd(List<FileObject> dirObjects, List<FileObject> fileObjectsTemp, List<String> fileContents) {
+		if (dirObjects.size() > 0 && fileObjectsTemp.size() > 0) {
+
+//			List<FileObject> todayNewDirs = new ArrayList<>();
 			List<FileObject> todayNewfiles = new ArrayList<>();
 
 			//检索今日新增
-			for(FileObject dir : todayNewDirs){
-				if(UtilDate.isThisToday(dir.getDate())){
-					todayNewfiles.add(dir);
-				}
-			}
+//			for(FileObject dir : dirObjects){
+//				if(UtilDate.isThisToday(dir.getDate())){
+//					todayNewDirs.add(dir);
+//				}
+//			}
 			for(FileObject f : fileObjectsTemp){
 				if(UtilDate.isThisToday(f.getDate())){
 					todayNewfiles.add(f);
@@ -84,8 +112,8 @@ public class TxtExport {
 				}
 			}
 
-			String fileContent = "    - - - - - - - - -    " + "****" + "  今日新增  ****" + "    - - - - - - - - -   \n";
-			fileContent += "文件夹新增总数:  " + todayNewDirs.size() + "\n";
+			String fileContent = "                        " + "****" + "  今日新增  ****" + "                        \n";
+//			fileContent += "文件夹新增总数:  " + todayNewDirs.size() + "\n";
 			fileContent += "文件新增总数:  " + todayNewfiles.size() + "\n";
 
 			if(todayNewDirMap.size() > 0){
@@ -93,9 +121,9 @@ public class TxtExport {
 				for(String name : todayNewDirMap.values()){
 					dirNams += "、" + name;
 				}
-				fileContent += "文件夹新增列表:  " + dirNams.substring(1) + "\n";
+				fileContent += "新增文件所在文件夹列表:  " + dirNams.substring(1) + "\n";
 			}else {
-				fileContent += "文件夹新增列表:  没有新增 \n";
+				fileContent += "新增文件所在文件夹列表:  没有新增 \n";
 			}
 
 			if(todayNewfiles.size() > 0){
@@ -116,17 +144,85 @@ public class TxtExport {
 				fileContent += "文件新增列表:  没有新增 \n";
 			}
 
-			fileContent += "日期: " + dateFormat.format(new Date()) + "\n";
 			fileContent += "\n";
 			fileContents.add(fileContent);
 		}else {
 			System.out.println("文件夹或文件 数量为 0 ");
 		}
-
-		fileContents.addAll(fileContentSplitJoint(rusultFileObjects, order));
-		exportByDocFormat(exportPath, fileContents);
 	}
-	
+
+	public static String todayStatistics(List<FileObject> fileObjects){
+		Map<String, FileObject> sameFileMap = new HashMap<>();
+		Map<String, FileObject> singleFileMap = new HashMap<>();
+		Long sumFilesNum = Long.valueOf(0);
+		BigDecimal sumFileSize = BigDecimal.valueOf(0);
+		BigDecimal sumSingleFileSize = BigDecimal.valueOf(0);
+		BigDecimal sumSameFileSize = BigDecimal.valueOf(0);
+		BigDecimal sumCharNum = BigDecimal.valueOf(0);
+		BigDecimal sumSingleCharNum = BigDecimal.valueOf(0);
+		BigDecimal sumSameCharNum = BigDecimal.valueOf(0);
+		for(FileObject f : fileObjects){
+			if(f.getType().equals("file")){
+				if(!singleFileMap.containsKey(f.getTitle())){
+					singleFileMap.put(f.getTitle(), f);
+					sumSingleFileSize = sumSingleFileSize.add(BigDecimal.valueOf(f.getSize())) ;
+					sumSingleCharNum = sumSingleCharNum.add(BigDecimal.valueOf(f.getContent().length()));
+				}else {
+					sameFileMap.put(f.getTitle(), f);
+					sumSameFileSize = sumSameFileSize.add(BigDecimal.valueOf(f.getSize())) ;
+					sumSameCharNum = sumSameCharNum.add(BigDecimal.valueOf(f.getContent().length()));
+				}
+				sumFilesNum += 1;
+				sumFileSize = sumFileSize.add(BigDecimal.valueOf(f.getSize())) ;
+				sumCharNum = sumCharNum.add(BigDecimal.valueOf(f.getContent().length()));
+			}
+		}
+
+		//换行符
+		String wrapChar = "\n";
+		String todayStatistics = "                        " + "****" + "  今日统计  ****" + "                        ";;
+		todayStatistics += wrapChar + "文件总个数：" + sumFilesNum;
+		todayStatistics += wrapChar + "重复文件个数：" + sameFileMap.size();
+		todayStatistics += wrapChar + "不重复文件个数：" + singleFileMap.size();
+		double fileRatio = (singleFileMap.size()/Double.parseDouble(String.valueOf(fileObjects.size())));
+		todayStatistics += wrapChar + "比例计算：实际文件个数 / 文件总个数 = " + String.format("%.2f", fileRatio);
+//
+//		System.out.println("\n************  今日统计 **************");
+//		System.out.println("文件总个数：" + sumFilesNum);
+//		System.out.println("重复文件个数：" + sameFileMap.size());
+//		System.out.println("不重复文件个数：" + singleFileMap.size());
+//		double fileRatio = (singleFileMap.size()/Double.parseDouble(String.valueOf(fileObjects.size())));
+//		System.out.println("比例计算：实际文件个数 / 文件总个数 = " + String.format("%.2f", fileRatio));
+
+		todayStatistics += wrapChar + "  - - - - - - - - - - - -  文件个数统计  - - - - - - - - - - - -";
+		todayStatistics += wrapChar + "文件总大小：" + sumFileSize;
+		todayStatistics += wrapChar + "重复文件大小：" + sumSameFileSize;
+		todayStatistics += wrapChar + "不重复文件大小：" + sumSingleFileSize;
+		BigDecimal singleFileSizeRatio = (sumSingleFileSize.divide(sumFileSize,2, BigDecimal.ROUND_HALF_UP));
+		todayStatistics += wrapChar + "比例计算：实际文件大小 / 文件总大小 = " + String.format("%.2f", singleFileSizeRatio);
+
+//		System.out.println("------------  文件个数统计  ------------");
+//		System.out.println("文件总大小：" + sumFileSize);
+//		System.out.println("重复文件大小：" + sumSameFileSize);
+//		System.out.println("不重复文件大小：" + sumSingleFileSize);
+//		System.out.println("比例计算：实际文件大小 / 文件总大小 = " + String.format("%.2f", singleFileSizeRatio));
+
+
+		todayStatistics += wrapChar + " - - - - - - - - - - - -  字符数统计  - - - - - - - - - - - -";
+		todayStatistics += wrapChar + "总字符数：" + sumCharNum;
+		todayStatistics += wrapChar + "重复字符数：" + sumSameCharNum;
+		todayStatistics += wrapChar + "不重复字符数：" + sumSingleCharNum;
+		BigDecimal singleCharSizeRatio = (sumSingleCharNum.divide(sumCharNum,2, BigDecimal.ROUND_HALF_UP));
+		todayStatistics += wrapChar + "比例计算：实际字符数 / 字符总数 = " + String.format("%.2f", singleCharSizeRatio);
+
+//		System.out.println("------------  字符统计  ------------");
+//		System.out.println("文件字符大小：" + sumCharNum);
+//		System.out.println("重复字符大小：" + sumSameCharNum);
+//		System.out.println("不重复字符大小：" + sumSingleCharNum);
+//		System.out.println("比例计算：实际字符大小 / 字符总大小 = " + String.format("%.2f", singleCharSizeRatio));
+		return todayStatistics += wrapChar + wrapChar + wrapChar;
+	}
+
 	//获取所有文件并放入FileObjectList中。
 	public static List<FileObject> getAllFile(String dirPath, List<FileObject> fileObjects) throws Exception{
 		File file = new File(dirPath);
@@ -192,7 +288,29 @@ public class TxtExport {
 		return fileObjects;
 	}
 	
-	//拼接所要导出的内容
+	//拼接所要导出的内容 ---- 不重复打印
+	public static List<String> fileContentSplitJointAbandonSame(List<List<FileObject>> rusultFileObjects, String order) {
+		List<String> fileContents = new ArrayList<String>();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss") ; //使用了默认的格式创建了一个日期格式化对象。
+
+		for(List<FileObject> fileObjects : rusultFileObjects) {
+			int fileNumber = 0;
+			for (FileObject f : fileObjects) {
+				if (null != f) {
+					String fileContent = "";
+					if (f.getType().equals("file")) {
+						fileContent += "\n" + f.getContent() + "\n";
+					}
+
+					fileContents.add(fileContent);
+				}
+			}
+		}
+		
+		return fileContents;
+	}
+
+	//拼接所要导出的内容  ---- 原样打印
 	public static List<String> fileContentSplitJoint(List<List<FileObject>> rusultFileObjects, String order) {
 		List<String> fileContents = new ArrayList<String>();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss") ; //使用了默认的格式创建了一个日期格式化对象。
@@ -230,7 +348,6 @@ public class TxtExport {
 				}
 			}
 		}
-		
 		return fileContents;
 	}
 	
