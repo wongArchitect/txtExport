@@ -350,8 +350,7 @@ public class TxtExport {
 		}
 		return fileContents;
 	}
-	
-	
+
 	public static String readSingleFile(String pathName) throws Exception{
 		/* 读入TXT文件 */  
 //        String pathName = "e:\\in.txt"; // 绝对路径或相对路径都可以，这里是绝对路径，写入文件时演示相对路径  
