@@ -316,7 +316,7 @@ public class TxtExportByDaySort {
                 }
                 fileContent += fileNams + "\n";
             } else {
-                fileContent += "文件新增列表:  没有新增 \n";
+                fileContent += "文件新增总列表:  没有新增 \n";
             }
 
             fileContent += "\n";
