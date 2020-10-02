@@ -39,22 +39,13 @@ public class TxtExportByCatalogueSort {
         }
 
         //排序
-        dirObjects.sort(new Comparator<FileObject>() {
-            @Override
-            public int compare(FileObject o1, FileObject o2) {
-                return o2.getFileYMDDate().compareTo(o1.getFileYMDDate());
-            }
-        });
-        fileObjectsTemp.sort(new Comparator<FileObject>() {
-            @Override
-            public int compare(FileObject o1, FileObject o2) {
-                if (order != null && order.equals(OrderType.ORDER_TYPE_ASC.getIndex())) {
-                    return o1.getLastModifiedDate().compareTo(o2.getLastModifiedDate());
-                } else {
-                    return o2.getLastModifiedDate().compareTo(o1.getLastModifiedDate());
-                }
-            }
-        });
+        if (order != null && order.equals(OrderType.ORDER_TYPE_ASC.getIndex())) {
+            dirObjects = dirObjects.stream().sorted(Comparator.comparing(FileObject::getCreateDate)).collect(Collectors.toList());
+            fileObjectsTemp = fileObjectsTemp.stream().sorted(Comparator.comparing(FileObject::getLastModifiedDate)).collect(Collectors.toList());
+        } else {
+            dirObjects = dirObjects.stream().sorted(Comparator.comparing(FileObject::getCreateDate).reversed()).collect(Collectors.toList());
+            fileObjectsTemp = fileObjectsTemp.stream().sorted(Comparator.comparing(FileObject::getLastModifiedDate).reversed()).collect(Collectors.toList());
+        }
 
         //把文件放对应文件夹中
         List<List<FileObject>> rusultFileObjects = new ArrayList<>();
