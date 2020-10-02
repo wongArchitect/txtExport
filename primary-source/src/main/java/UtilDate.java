@@ -1,7 +1,11 @@
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.logging.SimpleFormatter;
+
 /**
  * 名称：自定义订单类
  * 功能：工具类，可以用作获取系统日期、订单编号等
@@ -18,6 +22,39 @@ public class UtilDate {
 		DateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
 		return df.format(date);
 	}
+
+	public  static Boolean beforThatDay(Date date, String thatDayStr) throws ParseException {
+		DateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Calendar calendar1 = Calendar.getInstance();
+		calendar1.setTime(date);
+		Calendar calendar2 = Calendar.getInstance();
+		Date thatDay = sdf.parse(thatDayStr);
+		calendar2.setTime(thatDay);
+		return calendar1.get(Calendar.YEAR) < calendar2.get(Calendar.YEAR) || calendar1.get(Calendar.DAY_OF_YEAR) < calendar2.get(Calendar.DAY_OF_YEAR);
+	}
+
+	public  static Boolean betweenThatDay(Date date, String startDayStr, String endDayStr) throws ParseException {
+		DateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+
+		Calendar calendarStart = Calendar.getInstance();
+		Date startDay = sdf.parse(startDayStr);
+		calendarStart.setTime(startDay);
+
+		Calendar calendarEnd = Calendar.getInstance();
+		Date endDay = sdf.parse(endDayStr);
+		calendarEnd.setTime(endDay);
+		Boolean isBetween = (calendar.get(Calendar.YEAR) > calendarStart.get(Calendar.YEAR)
+				&& calendar.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR))
+				&&
+				(calendar.get(Calendar.DAY_OF_YEAR) > calendarStart.get(Calendar.DAY_OF_YEAR)
+				&& calendar.get(Calendar.DAY_OF_YEAR) <= calendarEnd.get(Calendar.DAY_OF_YEAR));
+		return isBetween;
+	}
+
+
+
 	//获取日期，格式：yyyy-MM-dd HH:mm:ss
 	public  static String getDateFormatter(){
 		Date date=new Date();
@@ -29,6 +66,11 @@ public class UtilDate {
 	public static String getDate(){
 		Date date=new Date();
 		DateFormat df=new SimpleDateFormat("yyyyMMdd");
+		return df.format(date);
+	}
+
+	public static String getYMDDate(Date date){
+		DateFormat df=new SimpleDateFormat("yyyy年MM月dd日");
 		return df.format(date);
 	}
 

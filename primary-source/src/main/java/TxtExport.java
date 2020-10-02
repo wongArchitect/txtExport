@@ -1,8 +1,5 @@
-import com.sun.deploy.util.StringUtils;
-
 import java.io.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -29,9 +26,9 @@ public class TxtExport {
 			@Override
 			public int compare(FileObject o1, FileObject o2) {
 				if(order != null && order.equals(" 正序 - 所属文件夹内排序")) {
-					return o1.getDate().compareTo(o2.getDate());
+					return o1.getLastModifiedDate().compareTo(o2.getLastModifiedDate());
 				}else {
-					return o2.getDate().compareTo(o1.getDate());
+					return o2.getLastModifiedDate().compareTo(o1.getLastModifiedDate());
 				}
 			}
 		});
@@ -41,16 +38,16 @@ public class TxtExport {
 		List<FileObject> fileObjectsTemp = new ArrayList<>();
 		//原样打印
 		for(FileObject f : fileObjects){
-			if(f.getType().equals("dir")){
+			if(f.getType().equals(FileType.FILE_TYPE_FOLDER.getName())){
 				dirObjects.add(f);
 			}
-			if(f.getType().equals("file")){
+			if(f.getType().equals(FileType.FILE_TYPE_DOC.getName())){
 				fileObjectsTemp.add(f);
 			}
 		}
 		//不重复打印
 //		for(FileObject f : fileObjects) {
-//			if(f.getType().equals("dir")){
+//			if(f.getType().equals(FileType.FILE_TYPE_FOLDER.getName())){
 //				dirObjects.add(f);
 //			}
 //		}
@@ -62,9 +59,25 @@ public class TxtExport {
 		List<List<FileObject>> rusultFileObjects = new ArrayList<>();
 		for(FileObject dir : dirObjects){
 			List<FileObject> rusultFileObjectsTemp = new ArrayList<>();
+			//指定到现在的文件日期
+			String thatDateStr = "2020-07-19 00:00:00";
+//			Date afterThatDate = UtilDate.getStrTransToDate("2020-07-17 59:59:59");
+//			//指定某天到现在的文件
+//			if(dir.getDate().before(thatDateStr)){
+//				continue;
+//			}
+//			if(UtilDate.beforThatDay(dir.getDate(), thatDateStr)){
+//				continue;
+//			}
 			rusultFileObjectsTemp.add(dir);
+			int innerOrder = 1;
 			for(FileObject f : fileObjectsTemp){
+//				指定某天到现在的文件
+//				if(UtilDate.beforThatDay(f.getDate(), thatDateStr)){
+//					continue;
+//				}
 				if(dir.getParentDir().equals(f.getParentDir())){
+					f.setFileInnerOrder(innerOrder++);
 					rusultFileObjectsTemp.add(f);
 				}
 			}
@@ -86,6 +99,71 @@ public class TxtExport {
 //		exportByDocFormat(exportPath, fileContentSplitJointAbandonSame(rusultFileObjects, order));
 	}
 
+	private static void daySort(List<FileObject> dirObjects, List<FileObject> fileObjectsTemp, List<String> fileContents) {
+		if (dirObjects.size() > 0 && fileObjectsTemp.size() > 0) {
+
+//			List<FileObject> todayNewDirs = new ArrayList<>();
+			List<FileObject> todayNewfiles = new ArrayList<>();
+
+			//检索今日新增
+//			for(FileObject dir : dirObjects){
+//				if(UtilDate.isThisToday(dir.getDate())){
+//					todayNewDirs.add(dir);
+//				}
+//			}
+			for(FileObject f : fileObjectsTemp){
+				if(UtilDate.isThisToday(f.getLastModifiedDate())){
+					todayNewfiles.add(f);
+				}
+			}
+			Map<String, String> todayNewDirMap = new HashMap<>();
+			for(FileObject f : todayNewfiles){
+				if(!todayNewDirMap.containsKey(f.getParentDir())){
+					String[] dirPathSplit =  f.getParentDir().split("\\\\");
+					String dirName = dirPathSplit[dirPathSplit.length - 1];
+					todayNewDirMap.put(f.getParentDir(), dirName);
+				}
+			}
+
+			String fileContent = "                        " + "****" + "  今日新增  ****" + "                        \n";
+//			fileContent += "文件夹新增总数:  " + todayNewDirs.size() + "\n";
+			fileContent += "文件新增总数:  " + todayNewfiles.size() + "\n";
+
+			if(todayNewDirMap.size() > 0){
+				String dirNams = "";
+				for(String name : todayNewDirMap.values()){
+					dirNams += "、" + name;
+				}
+				fileContent += "新增文件所在文件夹列表:  " + dirNams.substring(1) + "\n";
+			}else {
+				fileContent += "新增文件所在文件夹列表:  没有新增 \n";
+			}
+
+			if(todayNewfiles.size() > 0){
+				fileContent += "文件新增列表:  \n";
+				String fileNams = "";
+				todayNewDirMap.keySet();
+				for(String parentDir : todayNewDirMap.keySet()){
+					fileContent += "  - - " + parentDir + " ： \n";
+					for(FileObject f : todayNewfiles){
+						if(parentDir.equals(f.getParentDir())){
+							fileContent += "      - -  " + f.getTitle() + "\n";
+							fileContent += "      - -  大小： " + f.getSize() + "\n";
+						}
+					}
+				}
+				fileContent += fileNams + "\n";
+			}else {
+				fileContent += "文件新增列表:  没有新增 \n";
+			}
+
+			fileContent += "\n";
+			fileContents.add(fileContent);
+		}else {
+			System.out.println("文件夹或文件 数量为 0 ");
+		}
+	}
+
 	private static void todayAdd(List<FileObject> dirObjects, List<FileObject> fileObjectsTemp, List<String> fileContents) {
 		if (dirObjects.size() > 0 && fileObjectsTemp.size() > 0) {
 
@@ -99,7 +177,7 @@ public class TxtExport {
 //				}
 //			}
 			for(FileObject f : fileObjectsTemp){
-				if(UtilDate.isThisToday(f.getDate())){
+				if(UtilDate.isThisToday(f.getLastModifiedDate())){
 					todayNewfiles.add(f);
 				}
 			}
@@ -162,7 +240,7 @@ public class TxtExport {
 		BigDecimal sumSingleCharNum = BigDecimal.valueOf(0);
 		BigDecimal sumSameCharNum = BigDecimal.valueOf(0);
 		for(FileObject f : fileObjects){
-			if(f.getType().equals("file")){
+			if(f.getType().equals(FileType.FILE_TYPE_DOC.getName())){
 				if(!singleFileMap.containsKey(f.getTitle())){
 					singleFileMap.put(f.getTitle(), f);
 					sumSingleFileSize = sumSingleFileSize.add(BigDecimal.valueOf(f.getSize())) ;
@@ -232,11 +310,11 @@ public class TxtExport {
 		
 				
 		File [] files = file.listFiles();
-		String fileType = "file";
-		String dirType = "dir";
+		String fileType = FileType.FILE_TYPE_DOC.getName();
+		String dirType = FileType.FILE_TYPE_FOLDER.getName();
 		for(File f : files) {
 			FileObject fileObject = null;
-			
+
 			if(f.isFile() && f.getName().endsWith(".txt")) {
 				fileObject = new FileObject();
 				//类型
@@ -258,8 +336,10 @@ public class TxtExport {
 				fileObject.setContent(content);	
 				
 				//日期
-				Date date = getFileTime(filePath);
-				fileObject.setDate(date);
+				Date lastModifiedDate = getFileLastModifiedDate(f.getAbsolutePath());
+				fileObject.setLastModifiedDate(lastModifiedDate);
+				Date creatDate = getCreateFileTime(f.getAbsolutePath());
+				fileObject.setCreateDate(creatDate);
 			}
 			
 			if(f.isDirectory()) {
@@ -275,8 +355,10 @@ public class TxtExport {
 				//标题
 				fileObject.setTitle(f.getName());
 				//日期
-				Date date = getFileTime(f.getAbsolutePath());
-				fileObject.setDate(date);
+				Date lastModifiedDate = getFileLastModifiedDate(f.getAbsolutePath());
+				fileObject.setLastModifiedDate(lastModifiedDate);
+				Date creatDate = getCreateFileTime(f.getAbsolutePath());
+				fileObject.setCreateDate(creatDate);
 
 				getAllFile(f.getAbsolutePath() + "//", fileObjects);
 			}
@@ -298,7 +380,7 @@ public class TxtExport {
 			for (FileObject f : fileObjects) {
 				if (null != f) {
 					String fileContent = "";
-					if (f.getType().equals("file")) {
+					if (f.getType().equals(FileType.FILE_TYPE_DOC.getName())) {
 						fileContent += "\n" + f.getContent() + "\n";
 					}
 
@@ -321,17 +403,17 @@ public class TxtExport {
 				if (null != f) {
 					String fileContent = "";
 
-					if (f.getType().equals("dir")) {
+					if (f.getType().equals(FileType.FILE_TYPE_FOLDER.getName())) {
 						fileContent += "    - - - - - - - - -    " + "****" + "  文件夹: " + f.getTitle() +  "  ****" + "    - - - - - - - - -   \n";
 						fileContent += "路径:  " + f.getParentDir() + "\n";
-						fileContent += "日期: " + dateFormat.format(f.getDate()) + "\n";
+						fileContent += "日期: " + dateFormat.format(f.getLastModifiedDate()) + "\n";
 						fileContent += "\n";
 					}
 
-					if (f.getType().equals("file")) {
+					if (f.getType().equals(FileType.FILE_TYPE_DOC.getName())) {
 						fileContent += "标题: " + f.getTitle() + "\n";
 						fileContent += "所在文件夹:  " + f.getParentDir() + "\n";
-						fileContent += "日期: " + dateFormat.format(f.getDate()) + "\n";
+						fileContent += "日期: " + dateFormat.format(f.getLastModifiedDate()) + "\n";
 
 						//本文件夹内文件序号
 						if (null != order && order.equals("正序")) {
@@ -379,19 +461,34 @@ public class TxtExport {
         }  
         return rowContents;
 	}
-	
-	//获取文件创建时间
-	private static Date getFileTime(String filePath){
+
+	//获取文件最新时间
+	private static Date getFileLastModifiedDate(String filePath) {
 		File file = new File(filePath);
 		BasicFileAttributes attr = null;
 		try {
-			Path path= Paths.get(filePath);
-			BasicFileAttributeView basicview= Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS );
+			Path path = Paths.get(filePath);
+			BasicFileAttributeView basicview = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 			attr = basicview.readAttributes();
 			return new Date(file.lastModified());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new Date(attr.creationTime().toMillis());
+		}
+	}
+
+	//获取文件创建时间
+	private static Date getCreateFileTime(String filePath) throws IOException {
+		File file = new File(filePath);
+		BasicFileAttributes attr = null;
+		try {
+			Path path = Paths.get(filePath);
+			BasicFileAttributeView basicview = Files.getFileAttributeView(path, BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+			attr = basicview.readAttributes();
+			return new Date(attr.creationTime().toMillis());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Date(file.lastModified());
 		}
 	}
 
@@ -471,26 +568,32 @@ public class TxtExport {
 		}
 		return code;
     }
-	
-		
-	public static void main(String[] args) {
-//		List<String> fileContentsTemp = new ArrayList<String>();
-//		try { 
-//			List<String> fileContents = getAllFileContent("E:\\wong论", fileContentsTemp); 
-//			exportByDocFormat("e:\\wong论-随笔 "+ UtilDate.getDateNum() + ".doc", fileContents);
-//        } catch (Exception e) {  
-//            e.printStackTrace();  
-//        }  
-//
-		String orderASC = " 正序 - 所属文件夹内排序";
-		String orderDESC = " 倒序 - 所属文件夹内排序";
-		String sourceFilesRootDir = "E:\\GUAN论";
-		String exportFileDirName = "e:\\guan论-随笔 "+ UtilDate.getDateNum() + " -- " + orderASC + ".doc";
+
+    public static void export(String orderParam, String tag, String sourceFilesRootDir, String exportFileName){
+		System.out.println("\n     ------   " + orderParam + "打印开始    ------        ");
+		String order = orderParam.concat(tag);
+		String exportFile = exportFileName + UtilDate.getDateNum() + " -- " + order + ".doc";
 		try {
-			exportAllFileFromDir(exportFileDirName, sourceFilesRootDir, orderASC);
+			exportAllFileFromDir(exportFile, sourceFilesRootDir, order);
+			System.out.println("\n-----" + orderParam + "打印成功！！！！！！     ");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }  
+	}
+
+		
+	public static void main(String[] args) {
+
+		String tag = " - 所属文件夹内排序";
+		String sourceFilesRootDir = "E:\\GUAN论";
+		String exportFileName = "e:\\guan论-随笔 ";
+
+		String orderASC = " 正序";
+		export(orderASC, tag, sourceFilesRootDir, exportFileName);
+
+		String orderDESC = " 倒序";
+		export(orderDESC, tag, sourceFilesRootDir, exportFileName);
+	}
+
 }  
