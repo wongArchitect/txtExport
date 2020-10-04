@@ -671,10 +671,20 @@ public class TxtExportByDaySort {
         }
     }
 
+    public static void exportAsc() {
+        export(OrderType.ORDER_TYPE_ASC.getIndex(), TagType.TAG_TYPE_SORT_BY_WORK_DAY.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
+    }
+
+    public static void exportDesc() {
+        export(OrderType.ORDER_TYPE_DESC.getIndex(), TagType.TAG_TYPE_SORT_BY_WORK_DAY.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
+    }
+
+    public static void export() {
+        exportAsc();
+        exportDesc();
+    }
 
     public static void main(String[] args) {
-        export(OrderType.ORDER_TYPE_ASC.getIndex(), TagType.TAG_TYPE_SORT_BY_WORK_DAY.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
-        export(OrderType.ORDER_TYPE_DESC.getIndex(), TagType.TAG_TYPE_SORT_BY_WORK_DAY.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
     }
 
 }
