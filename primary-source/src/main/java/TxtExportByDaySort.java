@@ -503,7 +503,7 @@ public class TxtExportByDaySort {
                         fileContent += "- - - - > > " + "文件夹: " + f.getTitle() + "\n";
                         fileContent += "路径:  " + f.getParentDir() + "\n";
                         fileContent += "当前文件夹文件总数:  " + f.getDirInnerFileNum() + "\n";
-                        fileContent += "创建日期: " + dateFormat.format(f.getLastModifiedDate()) + "\n";
+                        fileContent += "创建日期: " + dateFormat.format(f.getCreateDate()) + "\n";
                         fileContent += "最后更新日期: " + dateFormat.format(f.getLastModifiedDate()) + "\n";
                         fileContent += "\n";
                     }
@@ -685,6 +685,9 @@ public class TxtExportByDaySort {
     }
 
     public static void main(String[] args) {
+
+        //工作日打印
+        export();
     }
 
 }
