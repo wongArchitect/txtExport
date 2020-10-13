@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
-import java.util.logging.SimpleFormatter;
 
 /**
  * 名称：自定义订单类
