@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,8 +53,9 @@ public class TxtExportByCatalogueSort {
             List<FileObject> rusultFileObjectsTemp = new ArrayList<>();
             rusultFileObjectsTemp.add(dir);
             //指定到现在的文件日期
-            String thatDateStr = "2020-07-19 00:00:00";
-//			Date afterThatDate = UtilDate.getStrTransToDate("2020-07-17 59:59:59");
+//            String startDateStr = "2020-07-29 00:00:00";
+//            String endDateStr = "2020-11-03 00:00:00";
+//			Date afterThatDate = UtilDate.betweenThatDay("2020-07-29 59:59:59");
 //			//指定某天到现在的文件
 //			if(dir.getDate().before(thatDateStr)){
 //				continue;
@@ -65,7 +67,7 @@ public class TxtExportByCatalogueSort {
             int innerOrder = 1;
             for(FileObject f : fileObjectsTemp){
 //				指定某天到现在的文件
-//				if(UtilDate.beforThatDay(f.getDate(), thatDateStr)){
+//				if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
 //					continue;
 //				}
                 if(dir.getParentDir().equals(f.getParentDir())){
@@ -624,6 +626,7 @@ public class TxtExportByCatalogueSort {
 
 
     public static void main(String[] args) {
+        exportAsc();
     }
 
 }

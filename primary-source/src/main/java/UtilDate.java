@@ -32,8 +32,11 @@ public class UtilDate {
 		return calendar1.get(Calendar.YEAR) < calendar2.get(Calendar.YEAR) || calendar1.get(Calendar.DAY_OF_YEAR) < calendar2.get(Calendar.DAY_OF_YEAR);
 	}
 
-	public  static Boolean betweenThatDay(Date date, String startDayStr, String endDayStr) throws ParseException {
+	public  static Boolean betweenThatDay(String fileObjectDate, String startDayStr, String endDayStr) throws ParseException {
 		DateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 指定一个日期
+		DateFormat sdfFileObject=new SimpleDateFormat("yyyy年MM月dd日");
+		Date date = sdfFileObject.parse(fileObjectDate);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
@@ -44,11 +47,14 @@ public class UtilDate {
 		Calendar calendarEnd = Calendar.getInstance();
 		Date endDay = sdf.parse(endDayStr);
 		calendarEnd.setTime(endDay);
-		Boolean isBetween = (calendar.get(Calendar.YEAR) > calendarStart.get(Calendar.YEAR)
+		Boolean isBetween =
+				(
+				(calendar.get(Calendar.YEAR) >= calendarStart.get(Calendar.YEAR)
 				&& calendar.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR))
-				&&
-				(calendar.get(Calendar.DAY_OF_YEAR) > calendarStart.get(Calendar.DAY_OF_YEAR)
-				&& calendar.get(Calendar.DAY_OF_YEAR) <= calendarEnd.get(Calendar.DAY_OF_YEAR));
+				)&&(
+				(calendar.get(Calendar.DAY_OF_YEAR) >= calendarStart.get(Calendar.DAY_OF_YEAR)
+				&& calendar.get(Calendar.DAY_OF_YEAR) <= calendarEnd.get(Calendar.DAY_OF_YEAR))
+				);
 		return isBetween;
 	}
 
