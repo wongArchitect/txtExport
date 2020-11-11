@@ -34,6 +34,10 @@ public class TxtExportByDaySort {
                 dirObjects.add(f);
             }
             if (f.getType().equals(FileType.FILE_TYPE_DOC.getName())) {
+//                指定某天到现在的文件
+//                if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
+//                    continue;
+//                }
                 fileObjectsTemp.add(f);
             }
         }
@@ -687,7 +691,7 @@ public class TxtExportByDaySort {
     public static void main(String[] args) {
 
         //工作日打印
-        export();
+        exportAsc();
     }
 
 }
