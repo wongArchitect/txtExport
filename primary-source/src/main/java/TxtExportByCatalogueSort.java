@@ -347,7 +347,7 @@ public class TxtExportByCatalogueSort {
                 //大小
                 fileObject.setSize(f.length());
                 //所在文件夹
-                fileObject.setParentDir(f.getParent().replace("//", "\\"));
+                fileObject.setParentDir(f.getParent().replace(Contents.SOURCE_FILES_ROOT_DIR_PRE, "").replace("//", "\\"));
                 //标题
                 if (f.getName().contains(":")) {
                     fileObject.setTitle(f.getName().split(":")[0]);
@@ -378,11 +378,11 @@ public class TxtExportByCatalogueSort {
                 if (dirPathTemp.endsWith("//")) {
                     dirPathTemp = dirPathTemp.replaceAll("//", "");
                 }
-                fileObject.setParentDir(dirPathTemp);
+                fileObject.setParentDir(dirPathTemp.replace(Contents.SOURCE_FILES_ROOT_DIR_PRE, ""));
                 //标题
                 fileObject.setTitle(f.getName());
                 //路径
-                fileObject.setPath(dirPathTemp + "\\\\" + f.getName());
+                fileObject.setPath(dirPathTemp.replace(Contents.SOURCE_FILES_ROOT_DIR_PRE, "") + "\\\\" + f.getName());
                 //日期
                 Date lastModifiedDate = getFileLastModifiedDate(f.getAbsolutePath());
                 fileObject.setLastModifiedDate(lastModifiedDate);
@@ -612,11 +612,11 @@ public class TxtExportByCatalogueSort {
     }
 
     public static void exportAsc() {
-        export(OrderType.ORDER_TYPE_ASC.getIndex(), TagType.TAG_TYPE_SORT_BY_CATALOGUE.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
+        export(OrderType.ORDER_TYPE_ASC.getIndex(), TagType.TAG_TYPE_SORT_BY_CATALOGUE.getName(), Contents.SOURCE_FILES_ROOT_DIR, Contents.EXPORT_FILE_NAME);
     }
 
     public static void exportDesc() {
-        export(OrderType.ORDER_TYPE_DESC.getIndex(), TagType.TAG_TYPE_SORT_BY_CATALOGUE.getName(), Contents.sourceFilesRootDir, Contents.exportFileName);
+        export(OrderType.ORDER_TYPE_DESC.getIndex(), TagType.TAG_TYPE_SORT_BY_CATALOGUE.getName(), Contents.SOURCE_FILES_ROOT_DIR, Contents.EXPORT_FILE_NAME);
     }
 
     public static void export() {
