@@ -47,14 +47,15 @@ public class UtilDate {
 		Calendar calendarEnd = Calendar.getInstance();
 		Date endDay = sdf.parse(endDayStr);
 		calendarEnd.setTime(endDay);
-		Boolean isBetween =
-				(
-				(calendar.get(Calendar.YEAR) >= calendarStart.get(Calendar.YEAR)
-				&& calendar.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR))
-				)&&(
-				(calendar.get(Calendar.DAY_OF_YEAR) >= calendarStart.get(Calendar.DAY_OF_YEAR)
-				&& calendar.get(Calendar.DAY_OF_YEAR) <= calendarEnd.get(Calendar.DAY_OF_YEAR))
-				);
+		Boolean isBetween = calendar.getTimeInMillis() >= calendarStart.getTimeInMillis() && calendar.getTimeInMillis() <= calendarEnd.getTimeInMillis();
+//				((calendar.get(Calendar.YEAR) >= calendarStart.get(Calendar.YEAR) && calendar.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR))
+//				)||(
+//				(calendar.get(Calendar.YEAR) >= calendarStart.get(Calendar.YEAR)
+//				&& calendar.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR))
+//				)&&(
+//				(calendar.get(Calendar.DAY_OF_YEAR) >= calendarStart.get(Calendar.DAY_OF_YEAR)
+//				&& calendar.get(Calendar.DAY_OF_YEAR) <= calendarEnd.get(Calendar.DAY_OF_YEAR))
+//				);
 		return isBetween;
 	}
 

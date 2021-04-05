@@ -67,9 +67,9 @@ public class TxtExportByCatalogueSort {
             int innerOrder = 1;
             for(FileObject f : fileObjectsTemp){
 //				指定某天到现在的文件
-//				if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
-//					continue;
-//				}
+				if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
+					continue;
+				}
                 if(dir.getParentDir().equals(f.getParentDir())){
                     if (order != null && order.equals(OrderType.ORDER_TYPE_ASC.getIndex())) {
                         f.setFileInnerOrder(innerOrder++);
