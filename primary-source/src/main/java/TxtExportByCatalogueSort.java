@@ -67,7 +67,11 @@ public class TxtExportByCatalogueSort {
             int innerOrder = 1;
             for(FileObject f : fileObjectsTemp){
 //				指定某天到现在的文件
-				if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
+				if(Contents.TIME_QUANTUM.equals(TimeQuantum.Do_Time_Quantum.getName()) &&
+                        (
+                                !UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.START_DATE_STR, Contents.END_DATE_STR)
+                        )
+                ){
 					continue;
 				}
                 if(dir.getParentDir().equals(f.getParentDir())){

@@ -35,7 +35,11 @@ public class TxtExportByDaySort {
             }
             if (f.getType().equals(FileType.FILE_TYPE_DOC.getName())) {
 //                指定某天到现在的文件
-                if(!UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.startDateStr, Contents.endDateStr)){
+                if(Contents.TIME_QUANTUM.equals(TimeQuantum.Do_Time_Quantum.getName()) &&
+                        (
+                                !UtilDate.betweenThatDay(f.getFileYMDDate(), Contents.START_DATE_STR, Contents.END_DATE_STR)
+                        )
+                ){
                     continue;
                 }
                 fileObjectsTemp.add(f);
