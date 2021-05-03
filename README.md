@@ -4,6 +4,8 @@ word导出txt文件
  一、git 使用 积累
  
      git 取消提交（add）操作、未pull便push的bug、git取消修改，恢复版本 命令大全
+     
+        注：一般用户，Git提交的单个文件不得大于100M
 
    1、git 取消提交（add）操作：通过回退版本实现。
    
@@ -65,3 +67,6 @@ word导出txt文件
         
         #回退到上一次提交的状态，按照某一次的commit完全反向的进行一次commit.(代码回滚到上个版本，并提交git)
         git revert HEAD
+        
+        
+   4、一般用户，Git提交的单个文件不得大于100M。
