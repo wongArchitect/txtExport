@@ -4,7 +4,7 @@ public class Contents {
     static String EXPORT_FILE_NAME = "E:\\precipitate\\workspace\\txtExport\\wg _ bak\\WG_bak\\WG_doc_bak\\WG论-随笔 ";
 
     static String START_DATE_STR = "2021-04-05 00:00:00";
-    static String END_DATE_STR = "2021-05-03 00:00:00";
+    static String END_DATE_STR = "2021-05-04 00:00:00";
 
 //    static String TIME_QUANTUM = "DoNotTimeQuantum";
     static String TIME_QUANTUM = "DoTimeQuantum";
